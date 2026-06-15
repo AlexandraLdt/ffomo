@@ -17,6 +17,7 @@ from dotenv import load_dotenv
 load_dotenv(override=True)
 
 import anthropic
+from bs4 import BeautifulSoup
 from playwright.async_api import async_playwright
 from supabase import create_client
 
@@ -48,7 +49,7 @@ Rules:
 
 Base URL of the page: {base_url}
 
-HTML (truncated to 60000 chars):
+Page text content (truncated to 60000 chars):
 {html}
 """
 
@@ -70,12 +71,22 @@ async def fetch_html(url: str) -> str:
     return html
 
 
+def strip_html(html: str) -> str:
+    soup = BeautifulSoup(html, "html.parser")
+    for tag in soup(["script", "style", "head", "nav", "footer", "iframe", "noscript"]):
+        tag.decompose()
+    text = soup.get_text(separator=" ", strip=True)
+    # Collapse runs of whitespace
+    import re
+    return re.sub(r"\s{2,}", " ", text)
+
+
 def extract_events_with_claude(html: str, base_url: str) -> list[dict]:
     client = anthropic.Anthropic(api_key=os.environ["ANTHROPIC_API_KEY"])
     prompt = EXTRACT_PROMPT.format(
         today=date.today().isoformat(),
         base_url=base_url,
-        html=html[:60000],
+        html=strip_html(html)[:60000],
     )
     message = client.messages.create(
         model="claude-haiku-4-5-20251001",
