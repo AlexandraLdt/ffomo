@@ -177,6 +177,7 @@ export default function HomeClient() {
           <p className="text-xs">
             Event data scraped daily from Frankfurt institution websites. Click any event to visit the source.
           </p>
+          <a href="/admin" className="text-xs" style={{ color: "var(--text-dim)" }}>Admin & Monitoring</a>
         </div>
       </footer>
     </main>
