@@ -34,3 +34,15 @@ body {
 * {
   box-sizing: border-box;
 }
+
+.venue-url {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  word-break: break-all;
+  text-decoration: none;
+  display: block;
+  margin-top: 0.2rem;
+}
+.venue-url:hover {
+  color: var(--accent);
+}

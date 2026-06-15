@@ -158,6 +158,9 @@ export default async function AdminPage() {
                         {venue.category}
                       </span>
                     </div>
+                    <a href={venue.url} target="_blank" rel="noopener noreferrer" className="venue-url">
+                      {venue.url}
+                    </a>
                     {log?.error && (
                       <div style={{ marginTop: "0.25rem", fontSize: "0.75rem", color: "#f87171" }}>
                         {log.error}
