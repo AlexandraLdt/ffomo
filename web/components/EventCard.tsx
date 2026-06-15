@@ -24,69 +24,63 @@ export default function EventCard({ event, compact = false }: EventCardProps) {
       href={event.eventUrl}
       target="_blank"
       rel="noopener noreferrer"
-      className="group block rounded-2xl overflow-hidden transition-transform duration-200 hover:-translate-y-1"
+      className="group relative block rounded-2xl overflow-hidden transition-transform duration-200 hover:-translate-y-1"
       style={{ background: "var(--bg-card)", textDecoration: "none" }}
     >
-      {/* Image / visual area */}
-      <div className={`relative overflow-hidden ${compact ? "h-32" : "h-48"}`}>
-        <img
-          src={imageUrl}
-          alt={event.title}
-          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-        />
-        {/* Gradient overlay */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+      {/* Blurred background image — subtle texture, not the main focus */}
+      <div
+        className="absolute inset-0 bg-cover bg-center"
+        style={{
+          backgroundImage: `url(${imageUrl})`,
+          filter: "blur(18px)",
+          transform: "scale(1.15)",
+          opacity: 0.18,
+        }}
+      />
 
-        {/* Date + time badge */}
-        <div className="absolute top-3 left-3 flex items-center gap-1.5">
-          <div
-            className="rounded-lg px-2.5 py-1 flex items-center gap-1.5"
-            style={{
-              background: "rgba(0,0,0,0.72)",
-              backdropFilter: "blur(8px)",
-              WebkitBackdropFilter: "blur(8px)",
-            }}
-          >
-            <span className="text-white text-xs font-semibold tracking-tight">
-              {formatCardDate(event.startDate)}
+      {/* Dark card overlay keeps text readable */}
+      <div
+        className="absolute inset-0"
+        style={{ background: "linear-gradient(160deg, var(--bg-card) 40%, transparent 100%)" }}
+      />
+
+      {/* Category accent line at top */}
+      <div
+        className="absolute top-0 left-0 right-0 h-[2px]"
+        style={{ background: cat.color }}
+      />
+
+      {/* Content */}
+      <div className={`relative ${compact ? "p-3" : "p-4 pt-5"}`}>
+        {/* Date + time */}
+        <div className="flex items-center gap-1.5 mb-3">
+          <span className="text-xs font-semibold" style={{ color: "var(--accent)" }}>
+            {formatCardDate(event.startDate)}
+          </span>
+          {event.startTime && (
+            <span className="text-xs" style={{ color: "var(--text-muted)" }}>
+              · {event.startTime}
             </span>
-            {event.startTime && (
-              <>
-                <span style={{ color: "var(--text-muted)" }} className="text-xs">·</span>
-                <span style={{ color: "var(--text-muted)" }} className="text-xs">
-                  {event.startTime}
-                </span>
-              </>
-            )}
-          </div>
+          )}
         </div>
 
-        {/* Category dot accent line */}
-        <div
-          className="absolute bottom-0 left-0 right-0 h-0.5"
-          style={{ background: cat.color }}
-        />
-      </div>
-
-      {/* Text content */}
-      <div className={compact ? "p-3" : "p-4"}>
         <h3
           className={`font-bold leading-snug line-clamp-2 mb-1.5 group-hover:text-[var(--accent)] transition-colors ${compact ? "text-sm" : "text-[15px]"}`}
           style={{ color: "var(--text)" }}
         >
           {event.title}
         </h3>
-        <p className="text-xs truncate" style={{ color: "var(--text-muted)" }}>
+
+        <p className="text-xs truncate mb-2" style={{ color: "var(--text-muted)" }}>
           {event.venueName}
         </p>
+
         {event.description && !compact && (
-          <p
-            className="text-xs mt-1.5 line-clamp-2"
-            style={{ color: "var(--text-dim)" }}
-          >
+          <p className="text-xs mt-1 line-clamp-2" style={{ color: "var(--text-dim)" }}>
             {event.description}
           </p>
         )}
+
         <div className="mt-3">
           <span
             className="inline-flex items-center gap-1 text-xs font-medium px-2.5 py-1 rounded-full"
