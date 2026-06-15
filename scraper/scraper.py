@@ -7,6 +7,7 @@ Run daily via cron:  0 6 * * * python scraper.py
 """
 
 import os
+import re
 import json
 import asyncio
 import logging
@@ -15,6 +16,10 @@ from datetime import datetime, date, timezone
 
 from dotenv import load_dotenv
 load_dotenv(override=True)
+
+import base64
+import re
+import requests as http
 
 import anthropic
 from bs4 import BeautifulSoup
@@ -76,22 +81,70 @@ def strip_html(html: str) -> str:
     for tag in soup(["script", "style", "head", "nav", "footer", "iframe", "noscript"]):
         tag.decompose()
     text = soup.get_text(separator=" ", strip=True)
-    # Collapse runs of whitespace
-    import re
     return re.sub(r"\s{2,}", " ", text)
 
 
-def extract_events_with_claude(html: str, base_url: str) -> list[dict]:
+MIN_IMAGE_WIDTH = 256  # skip logos and icons
+
+def fetch_page_images(html: str, page_url: str) -> list[dict]:
+    """Download images from the page and return them as base64-encoded dicts for the Claude API."""
+    soup = BeautifulSoup(html, "html.parser")
+    seen = set()
+    images = []
+    headers = {"Referer": page_url, "User-Agent": "Mozilla/5.0"}
+
+    for img in soup.find_all("img"):
+        src = img.get("src") or img.get("data-src") or ""
+        if not src or src in seen:
+            continue
+        seen.add(src)
+
+        # Skip small images (logos, icons) by checking width in URL when available
+        if "dimension=" in src:
+            try:
+                w = int(src.split("dimension=")[1].split("x")[0])
+                if w < MIN_IMAGE_WIDTH:
+                    continue
+            except (ValueError, IndexError):
+                pass
+
+        try:
+            r = http.get(src, headers=headers, timeout=10)
+            if r.status_code != 200 or len(r.content) < 5000:
+                continue
+            media_type = r.headers.get("Content-Type", "image/jpeg").split(";")[0]
+            images.append({
+                "type": "image",
+                "source": {
+                    "type": "base64",
+                    "media_type": media_type,
+                    "data": base64.standard_b64encode(r.content).decode("utf-8"),
+                },
+            })
+        except Exception as e:
+            log.warning(f"Could not fetch image {src}: {e}")
+
+    log.info(f"  → {len(images)} images fetched for vision")
+    return images
+
+
+def extract_events_with_claude(html: str, base_url: str, images: list[dict] | None = None) -> list[dict]:
     client = anthropic.Anthropic(api_key=os.environ["ANTHROPIC_API_KEY"])
-    prompt = EXTRACT_PROMPT.format(
+    text_prompt = EXTRACT_PROMPT.format(
         today=date.today().isoformat(),
         base_url=base_url,
         html=strip_html(html)[:60000],
     )
+    # Build content: images first (if any), then the text prompt
+    content: list = []
+    if images:
+        content.extend(images)
+    content.append({"type": "text", "text": text_prompt})
+
     message = client.messages.create(
         model="claude-haiku-4-5-20251001",
         max_tokens=4096,
-        messages=[{"role": "user", "content": prompt}],
+        messages=[{"role": "user", "content": content}],
     )
     raw = message.content[0].text.strip()
     # Strip markdown code fences if present
@@ -163,7 +216,8 @@ async def scrape_venue(db, venue: dict, run_id: str):
         html = await fetch_html(venue["url"])
         text = strip_html(html)
         page_text_length = len(text)
-        events = extract_events_with_claude(html, venue["url"])
+        images = fetch_page_images(html, venue["url"]) if venue.get("scrape_images") else None
+        events = extract_events_with_claude(html, venue["url"], images=images)
         events_found = len(events)
         log.info(f"  → {events_found} events found (page text: {page_text_length:,} chars)")
         new_events, updated_events = upsert_events(db, venue["id"], events)

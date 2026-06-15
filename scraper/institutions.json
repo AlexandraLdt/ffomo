@@ -147,7 +147,8 @@
     "id": "frankfurt-lieblingsorte",
     "name": "Frankfurt Lieblingsorte",
     "url": "https://www.frankfurtlieblingsorte.de/",
-    "category": "activities"
+    "category": "activities",
+    "scrape_images": true
   },
   {
     "id": "hfm-flohmaerkte",
