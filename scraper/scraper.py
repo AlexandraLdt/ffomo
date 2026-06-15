@@ -73,7 +73,7 @@ def extract_events_with_claude(html: str, base_url: str) -> list[dict]:
         html=html[:60000],
     )
     message = client.messages.create(
-        model="claude-opus-4-7",
+        model="claude-haiku-4-5-20251001",
         max_tokens=4096,
         messages=[{"role": "user", "content": prompt}],
     )
