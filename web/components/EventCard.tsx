@@ -27,31 +27,26 @@ export default function EventCard({ event, compact = false }: EventCardProps) {
       className="group relative block rounded-2xl overflow-hidden transition-transform duration-200 hover:-translate-y-1"
       style={{ background: "var(--bg-card)", textDecoration: "none" }}
     >
-      {/* Blurred background image — subtle texture, not the main focus */}
-      <div
-        className="absolute inset-0 bg-cover bg-center"
-        style={{
-          backgroundImage: `url(${imageUrl})`,
-          filter: "blur(18px)",
-          transform: "scale(1.15)",
-          opacity: 0.18,
-        }}
-      />
+      {/* Small image area at top — subdued, not dominant */}
+      {!compact && (
+        <div className="relative h-28 overflow-hidden">
+          <div
+            className="absolute inset-0 bg-cover bg-center"
+            style={{ backgroundImage: `url(${imageUrl})` }}
+          />
+          <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(0,0,0,0.25) 0%, rgba(10,4,22,0.75) 100%)" }} />
+          {/* Category accent line at top */}
+          <div className="absolute top-0 left-0 right-0 h-[2px]" style={{ background: cat.color }} />
+        </div>
+      )}
 
-      {/* Dark card overlay keeps text readable */}
-      <div
-        className="absolute inset-0"
-        style={{ background: "linear-gradient(160deg, var(--bg-card) 40%, transparent 100%)" }}
-      />
-
-      {/* Category accent line at top */}
-      <div
-        className="absolute top-0 left-0 right-0 h-[2px]"
-        style={{ background: cat.color }}
-      />
+      {/* Category accent line for compact mode */}
+      {compact && (
+        <div className="absolute top-0 left-0 right-0 h-[2px]" style={{ background: cat.color }} />
+      )}
 
       {/* Content */}
-      <div className={`relative ${compact ? "p-3" : "p-4 pt-5"}`}>
+      <div className={`relative ${compact ? "p-3 pt-4" : "p-4"}`}>
         {/* Date + time */}
         <div className="flex items-center gap-1.5 mb-3">
           <span className="text-xs font-semibold" style={{ color: "var(--accent)" }}>
@@ -71,7 +66,7 @@ export default function EventCard({ event, compact = false }: EventCardProps) {
           {event.title}
         </h3>
 
-        <p className="text-xs truncate mb-2" style={{ color: "var(--text-muted)" }}>
+        <p className="text-sm truncate mb-2" style={{ color: "var(--text-muted)" }}>
           {event.venueName}
         </p>
 

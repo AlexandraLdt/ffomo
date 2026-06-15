@@ -67,12 +67,14 @@ export default function HomeClient() {
         }}
       >
         <div className="flex items-center gap-3">
-          <h1
-            className="text-5xl font-black tracking-tight"
-            style={{ color: "var(--accent)", letterSpacing: "-0.04em" }}
-          >
-            FFOMO
-          </h1>
+          <a href="/" style={{ textDecoration: "none" }}>
+            <h1
+              className="text-5xl font-black tracking-tight"
+              style={{ color: "var(--accent)", letterSpacing: "-0.04em" }}
+            >
+              FFOMO
+            </h1>
+          </a>
           <span
             className="text-xs font-semibold tracking-widest uppercase hidden sm:block"
             style={{ color: "var(--text-muted)" }}
