@@ -10,7 +10,8 @@ import os
 import json
 import asyncio
 import logging
-from datetime import datetime, date
+import uuid
+from datetime import datetime, date, timezone
 
 from dotenv import load_dotenv
 load_dotenv(override=True)
@@ -52,6 +53,10 @@ HTML (truncated to 60000 chars):
 """
 
 
+def now_utc() -> str:
+    return datetime.now(timezone.utc).isoformat()
+
+
 async def fetch_html(url: str) -> str:
     async with async_playwright() as p:
         browser = await p.chromium.launch(headless=True)
@@ -91,7 +96,6 @@ def extract_events_with_claude(html: str, base_url: str) -> list[dict]:
     try:
         return json.loads(raw)
     except json.JSONDecodeError:
-        # Try to salvage partial JSON by truncating at the last complete object
         last_complete = raw.rfind("},")
         if last_complete != -1:
             raw = raw[:last_complete+1] + "]"
@@ -103,7 +107,15 @@ def extract_events_with_claude(html: str, base_url: str) -> list[dict]:
         return []
 
 
-def upsert_events(db, venue_id: str, events: list[dict]):
+def upsert_events(db, venue_id: str, events: list[dict]) -> tuple[int, int]:
+    """Returns (new_events, updated_events)."""
+    new_count = 0
+    updated_count = 0
+
+    # Fetch existing (title, start_date) pairs for this venue to detect new vs updated
+    existing = db.table("events").select("title,start_date").eq("venue_id", venue_id).execute()
+    existing_keys = {(r["title"], r["start_date"]) for r in existing.data}
+
     for ev in events:
         if not ev.get("start_date") or not ev.get("title"):
             continue
@@ -116,21 +128,46 @@ def upsert_events(db, venue_id: str, events: list[dict]):
             "start_time": ev.get("start_time"),
             "event_url": ev.get("event_url", ""),
             "image_url": ev.get("image_url"),
-            "scraped_at": datetime.utcnow().isoformat(),
+            "scraped_at": now_utc(),
         }
         db.table("events").upsert(record, on_conflict="venue_id,title,start_date").execute()
 
+        if (ev["title"], ev["start_date"]) in existing_keys:
+            updated_count += 1
+        else:
+            new_count += 1
 
-async def scrape_venue(db, venue: dict):
+    return new_count, updated_count
+
+
+async def scrape_venue(db, venue: dict, run_id: str):
     log.info(f"Scraping {venue['name']} ...")
+    error = None
+    events_found = 0
+    new_events = 0
+    updated_events = 0
+
     try:
         html = await fetch_html(venue["url"])
         events = extract_events_with_claude(html, venue["url"])
-        log.info(f"  → {len(events)} events found")
-        upsert_events(db, venue["id"], events)
-        db.table("venues").update({"last_scraped_at": datetime.utcnow().isoformat()}).eq("id", venue["id"]).execute()
+        events_found = len(events)
+        log.info(f"  → {events_found} events found")
+        new_events, updated_events = upsert_events(db, venue["id"], events)
+        db.table("venues").update({"last_scraped_at": now_utc()}).eq("id", venue["id"]).execute()
     except Exception as e:
+        error = str(e)
         log.error(f"  ✗ Failed to scrape {venue['name']}: {e}")
+
+    db.table("scraper_logs").insert({
+        "run_id": run_id,
+        "venue_id": venue["id"],
+        "venue_name": venue["name"],
+        "events_found": events_found,
+        "new_events": new_events,
+        "updated_events": updated_events,
+        "error": error,
+        "scraped_at": now_utc(),
+    }).execute()
 
 
 async def main():
@@ -146,10 +183,15 @@ async def main():
     for inst in institutions:
         inst["id"] = venue_map.get(inst["name"], inst["id"])
 
-    # Scrape sequentially to be polite to servers
-    for venue in institutions:
-        await scrape_venue(db, venue)
+    # Create a run record
+    run_result = db.table("scraper_runs").insert({"started_at": now_utc()}).execute()
+    run_id = run_result.data[0]["id"]
+    log.info(f"Run ID: {run_id}")
 
+    for venue in institutions:
+        await scrape_venue(db, venue, run_id)
+
+    db.table("scraper_runs").update({"finished_at": now_utc()}).eq("id", run_id).execute()
     log.info("Scrape complete.")
 
 
