@@ -19,10 +19,7 @@ from urllib.parse import urljoin
 from dotenv import load_dotenv
 load_dotenv(override=True)
 
-import base64
-import re
 import requests as http
-
 import anthropic
 from bs4 import BeautifulSoup
 from playwright.async_api import async_playwright
@@ -135,6 +132,8 @@ def fetch_page_images(html: str, page_url: str) -> list[dict]:
 
 def extract_events_with_claude(html: str, base_url: str, images: list[dict] | None = None) -> list[dict]:
     client = anthropic.Anthropic(api_key=os.environ["ANTHROPIC_API_KEY"])
+    image_urls = extract_images_from_html(html, base_url)
+    image_list = "\n".join(image_urls) if image_urls else "(none found)"
     text_prompt = EXTRACT_PROMPT.format(
         today=date.today().isoformat(),
         base_url=base_url,
