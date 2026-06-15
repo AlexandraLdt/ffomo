@@ -1,4 +1,5 @@
 import { Event, CATEGORIES } from "@/lib/types";
+import { getFallbackImage } from "@/lib/fallbackImages";
 
 interface EventCardProps {
   event: Event;
@@ -16,6 +17,7 @@ function formatCardDate(dateStr: string): string {
 
 export default function EventCard({ event, compact = false }: EventCardProps) {
   const cat = CATEGORIES[event.category];
+  const imageUrl = event.imageUrl || getFallbackImage(event.category, event.id, event.title, event.description ?? "");
 
   return (
     <a
@@ -27,40 +29,13 @@ export default function EventCard({ event, compact = false }: EventCardProps) {
     >
       {/* Image / visual area */}
       <div className={`relative overflow-hidden ${compact ? "h-32" : "h-48"}`}>
-        {event.imageUrl ? (
-          <>
-            <img
-              src={event.imageUrl}
-              alt={event.title}
-              className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-            />
-            {/* Gradient overlay */}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-          </>
-        ) : (
-          /* Stylised placeholder when no image */
-          <div
-            className="w-full h-full flex items-center justify-center"
-            style={{
-              background: `linear-gradient(135deg, ${cat.color}33 0%, #111111 100%)`,
-            }}
-          >
-            <span
-              className="text-5xl opacity-30"
-              style={{ filter: "grayscale(30%)" }}
-            >
-              {cat.icon}
-            </span>
-            {/* Subtle diagonal lines texture */}
-            <div
-              className="absolute inset-0 opacity-5"
-              style={{
-                backgroundImage:
-                  "repeating-linear-gradient(45deg, #fff 0px, #fff 1px, transparent 1px, transparent 12px)",
-              }}
-            />
-          </div>
-        )}
+        <img
+          src={imageUrl}
+          alt={event.title}
+          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+        />
+        {/* Gradient overlay */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
 
         {/* Date + time badge */}
         <div className="absolute top-3 left-3 flex items-center gap-1.5">

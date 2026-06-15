@@ -9,10 +9,12 @@ Run daily via cron:  0 6 * * * python scraper.py
 import os
 import re
 import json
+import base64
 import asyncio
 import logging
 import uuid
 from datetime import datetime, date, timezone
+from urllib.parse import urljoin
 
 from dotenv import load_dotenv
 load_dotenv(override=True)
@@ -33,7 +35,7 @@ INSTITUTIONS_FILE = os.path.join(os.path.dirname(__file__), "institutions.json")
 
 EXTRACT_PROMPT = """You are extracting upcoming events from a Frankfurt cultural institution's website.
 
-Given the HTML of an events page, extract ALL upcoming events and return them as a JSON array.
+Given the text content of an events page, extract ALL upcoming events and return them as a JSON array.
 Today's date is {today}.
 
 For each event return:
@@ -44,7 +46,7 @@ For each event return:
   "end_date": "YYYY-MM-DD or null",
   "start_time": "HH:MM or null",
   "event_url": "Direct URL to the event detail page (use the base_url if only relative paths are found)",
-  "image_url": "Absolute image URL or null"
+  "image_url": "Pick the most relevant image URL from AVAILABLE IMAGES that matches this specific event, or null if none fit"
 }}
 
 Rules:
@@ -53,6 +55,9 @@ Rules:
 - Return ONLY the JSON array, no markdown, no explanation.
 
 Base URL of the page: {base_url}
+
+AVAILABLE IMAGES found on this page (prefer these for image_url — pick the one that best matches each event):
+{image_urls}
 
 Page text content (truncated to 60000 chars):
 {html}
@@ -133,6 +138,7 @@ def extract_events_with_claude(html: str, base_url: str, images: list[dict] | No
     text_prompt = EXTRACT_PROMPT.format(
         today=date.today().isoformat(),
         base_url=base_url,
+        image_urls=image_list,
         html=strip_html(html)[:60000],
     )
     # Build content: images first (if any), then the text prompt
@@ -147,12 +153,10 @@ def extract_events_with_claude(html: str, base_url: str, images: list[dict] | No
         messages=[{"role": "user", "content": content}],
     )
     raw = message.content[0].text.strip()
-    # Strip markdown code fences if present
     if "```" in raw:
         raw = raw.split("```")[1]
         if raw.startswith("json"):
             raw = raw[4:]
-    # Find the JSON array even if there's surrounding text
     start = raw.find("[")
     end = raw.rfind("]")
     if start != -1 and end != -1:
@@ -176,7 +180,6 @@ def upsert_events(db, venue_id: str, events: list[dict]) -> tuple[int, int]:
     new_count = 0
     updated_count = 0
 
-    # Fetch existing (title, start_date) pairs for this venue to detect new vs updated
     existing = db.table("events").select("title,start_date").eq("venue_id", venue_id).execute()
     existing_keys = {(r["title"], r["start_date"]) for r in existing.data}
 
@@ -245,14 +248,12 @@ async def main():
     with open(INSTITUTIONS_FILE) as f:
         institutions = json.load(f)
 
-    # Fetch venue IDs from DB (to link events to DB UUIDs)
     venues_result = db.table("venues").select("id,name").execute()
     venue_map = {v["name"]: v["id"] for v in venues_result.data}
 
     for inst in institutions:
         inst["id"] = venue_map.get(inst["name"], inst["id"])
 
-    # Create a run record
     run_result = db.table("scraper_runs").insert({"started_at": now_utc()}).execute()
     run_id = run_result.data[0]["id"]
     log.info(f"Run ID: {run_id}")

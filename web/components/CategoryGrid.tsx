@@ -20,7 +20,7 @@ export default function CategoryGrid() {
           key={slug}
           href={`/category/${slug}`}
           className="group relative overflow-hidden rounded-2xl flex flex-col items-center justify-center text-center"
-          style={{ aspectRatio: "3/4", textDecoration: "none" }}
+          style={{ aspectRatio: "3/4", textDecoration: "none", border: "2px solid rgba(255,95,160,0.45)" }}
         >
           {/* Background image */}
           <div
