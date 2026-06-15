@@ -68,7 +68,7 @@ export default function HomeClient() {
       >
         <div className="flex items-center gap-3">
           <h1
-            className="text-2xl font-black tracking-tight"
+            className="text-5xl font-black tracking-tight"
             style={{ color: "var(--accent)", letterSpacing: "-0.04em" }}
           >
             FFOMO
@@ -118,10 +118,10 @@ export default function HomeClient() {
 
       {/* ── Hero ── */}
       <section className="px-6 md:px-12 lg:px-20 pt-10 pb-8">
-        <p className="text-3xl md:text-4xl font-bold leading-tight" style={{ color: "var(--text)" }}>
-          Your city.<br />Every event.
+        <p className="text-lg font-semibold leading-tight" style={{ color: "var(--text)" }}>
+          Your city. Every event.
         </p>
-        <p className="mt-2 text-sm" style={{ color: "var(--text-muted)" }}>
+        <p className="mt-1 text-xs" style={{ color: "var(--text-muted)" }}>
           Lectures · Culture · Activities · Cinema — updated daily.
         </p>
       </section>
