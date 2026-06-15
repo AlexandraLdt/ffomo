@@ -137,7 +137,7 @@ def upsert_events(db, venue_id: str, events: list[dict]) -> tuple[int, int]:
             "start_date": ev["start_date"],
             "end_date": ev.get("end_date"),
             "start_time": ev.get("start_time"),
-            "event_url": ev.get("event_url", ""),
+            "event_url": ev.get("event_url") or "",
             "image_url": ev.get("image_url"),
             "scraped_at": now_utc(),
         }
