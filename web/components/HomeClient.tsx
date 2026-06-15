@@ -28,6 +28,7 @@ export default function HomeClient() {
   const [view, setView] = useState<View>("categories");
   const [eventDates, setEventDates] = useState<Set<string>>(new Set());
   const [dayGroups, setDayGroups] = useState<DayGroup[]>([]);
+  const [showCalendar, setShowCalendar] = useState(false);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 
@@ -54,77 +55,107 @@ export default function HomeClient() {
 
   return (
     <main className="min-h-screen flex flex-col">
-      {/* ── Hero ── */}
-      <section
-        className="relative flex flex-col lg:flex-row items-start justify-between gap-8 px-6 md:px-12 lg:px-20 pt-16 pb-12"
-        style={{ background: "var(--bg)" }}
+
+      {/* ── Top bar ── */}
+      <header
+        className="sticky top-0 z-50 px-6 md:px-12 lg:px-20 py-4 flex items-center justify-between"
+        style={{
+          background: "rgba(10, 4, 22, 0.85)",
+          backdropFilter: "blur(20px)",
+          WebkitBackdropFilter: "blur(20px)",
+          borderBottom: "1px solid var(--border-subtle)",
+        }}
       >
-        <div className="flex-1 max-w-xl">
-          <div className="mb-2">
-            <span className="text-xs font-semibold tracking-widest uppercase" style={{ color: "var(--accent)" }}>
-              Frankfurt
-            </span>
-          </div>
+        <div className="flex items-center gap-3">
           <h1
-            className="text-7xl md:text-8xl font-black tracking-tight leading-none mb-6"
+            className="text-2xl font-black tracking-tight"
             style={{ color: "var(--accent)", letterSpacing: "-0.04em" }}
           >
             FFOMO
           </h1>
-          <p className="text-2xl md:text-3xl font-semibold leading-snug max-w-sm" style={{ color: "var(--text)" }}>
-            Your city. Every event.
-          </p>
-          <p className="mt-4 text-base" style={{ color: "var(--text-muted)" }}>
-            Lectures · Culture · Activities · Cinema — updated daily.
-          </p>
-        </div>
-
-        <div
-          className="shrink-0 rounded-2xl p-6"
-          style={{ background: "var(--bg-card)", border: "1px solid var(--border)", width: 380 }}
-        >
-          <p className="text-xs font-semibold tracking-widest uppercase mb-5" style={{ color: "var(--text-muted)" }}>
-            Jump to a date
-          </p>
-          <Calendar eventDates={eventDates} onDateSelect={(date) => router.push(`/day/${date}`)} />
-        </div>
-      </section>
-
-      {/* ── Divider ── */}
-      <div className="px-6 md:px-12 lg:px-20">
-        <div className="h-px" style={{ background: "var(--border)" }} />
-      </div>
-
-      {/* ── View Toggle + Content ── */}
-      <section className="flex-1 px-6 md:px-12 lg:px-20 py-10">
-        <div className="flex items-center gap-3 mb-8">
-          <div className="flex rounded-xl p-1 gap-1" style={{ background: "var(--border)" }}>
-            <button
-              onClick={() => setView("categories")}
-              className="px-4 py-2 rounded-lg text-sm font-medium transition-all"
-              style={{
-                background: view === "categories" ? "var(--accent)" : "transparent",
-                color: view === "categories" ? "white" : "var(--text-muted)",
-              }}
-            >
-              By Category
-            </button>
-            <button
-              onClick={() => setView("days")}
-              className="px-4 py-2 rounded-lg text-sm font-medium transition-all"
-              style={{
-                background: view === "days" ? "var(--accent)" : "transparent",
-                color: view === "days" ? "white" : "var(--text-muted)",
-              }}
-            >
-              By Day
-            </button>
-          </div>
-          <span className="text-sm" style={{ color: "var(--text-muted)" }}>
-            {view === "categories" ? "Browse events by type" : "See what's coming up day by day"}
+          <span
+            className="text-xs font-semibold tracking-widest uppercase hidden sm:block"
+            style={{ color: "var(--text-muted)" }}
+          >
+            Frankfurt
           </span>
         </div>
 
+        <button
+          onClick={() => setShowCalendar(!showCalendar)}
+          className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200"
+          style={{
+            background: showCalendar ? "var(--accent)" : "var(--bg-card)",
+            color: showCalendar ? "white" : "var(--text-muted)",
+            border: "1px solid var(--border)",
+          }}
+        >
+          <span>📅</span>
+          <span className="hidden sm:inline">Jump to date</span>
+        </button>
+      </header>
+
+      {/* ── Calendar dropdown ── */}
+      {showCalendar && (
+        <div
+          className="px-6 md:px-12 lg:px-20 py-6"
+          style={{ background: "var(--bg-card)", borderBottom: "1px solid var(--border)" }}
+        >
+          <p className="text-xs font-semibold tracking-widest uppercase mb-4" style={{ color: "var(--text-muted)" }}>
+            Jump to a date
+          </p>
+          <div className="max-w-sm">
+            <Calendar
+              eventDates={eventDates}
+              onDateSelect={(date) => {
+                setShowCalendar(false);
+                router.push(`/day/${date}`);
+              }}
+            />
+          </div>
+        </div>
+      )}
+
+      {/* ── Hero ── */}
+      <section className="px-6 md:px-12 lg:px-20 pt-10 pb-8">
+        <p className="text-3xl md:text-4xl font-bold leading-tight" style={{ color: "var(--text)" }}>
+          Your city.<br />Every event.
+        </p>
+        <p className="mt-2 text-sm" style={{ color: "var(--text-muted)" }}>
+          Lectures · Culture · Activities · Cinema — updated daily.
+        </p>
+      </section>
+
+      {/* ── Filter pills ── */}
+      <section className="px-6 md:px-12 lg:px-20 pb-8">
+        <div className="flex gap-2">
+          <button
+            onClick={() => setView("categories")}
+            className="px-4 py-2 rounded-full text-sm font-semibold transition-all duration-200"
+            style={{
+              background: view === "categories" ? "var(--accent)" : "var(--bg-card)",
+              color: view === "categories" ? "white" : "var(--text-muted)",
+              border: "1px solid " + (view === "categories" ? "var(--accent)" : "var(--border)"),
+            }}
+          >
+            By Category
+          </button>
+          <button
+            onClick={() => setView("days")}
+            className="px-4 py-2 rounded-full text-sm font-semibold transition-all duration-200"
+            style={{
+              background: view === "days" ? "var(--accent)" : "var(--bg-card)",
+              color: view === "days" ? "white" : "var(--text-muted)",
+              border: "1px solid " + (view === "days" ? "var(--accent)" : "var(--border)"),
+            }}
+          >
+            By Day
+          </button>
+        </div>
+      </section>
+
+      {/* ── Content ── */}
+      <section className="flex-1 px-6 md:px-12 lg:px-20 pb-16">
         {loading ? (
           <div className="text-center py-20" style={{ color: "var(--text-muted)" }}>
             Loading events…
@@ -138,16 +169,13 @@ export default function HomeClient() {
 
       {/* ── Footer ── */}
       <footer
-        className="px-6 md:px-12 lg:px-20 py-8 mt-8"
+        className="px-6 md:px-12 lg:px-20 py-6"
         style={{ borderTop: "1px solid var(--border)", color: "var(--text-muted)" }}
       >
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-          <div>
-            <span className="font-bold text-sm" style={{ color: "var(--text)" }}>FFOMO</span>
-            <span className="text-sm ml-2">Frankfurt's event guide — updated daily</span>
-          </div>
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+          <span className="text-sm font-bold" style={{ color: "var(--accent)" }}>FFOMO</span>
           <p className="text-xs">
-            Event data is scraped automatically from institution websites. Click any event to visit the source.
+            Event data scraped daily from Frankfurt institution websites. Click any event to visit the source.
           </p>
         </div>
       </footer>

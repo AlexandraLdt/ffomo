@@ -6,9 +6,11 @@
   --bg-card-hover: #1E0D42;
   --text: #FFFFFF;
   --text-muted: #8B7AAE;
+  --text-dim: #4A3870;
   --accent: #FF5FA0;
   --accent-hover: #FF3D8A;
   --border: #2A1260;
+  --border-subtle: #1A0A38;
 }
 
 @theme inline {
@@ -17,7 +19,6 @@
   --color-text: var(--text);
   --color-text-muted: var(--text-muted);
   --color-accent: var(--accent);
-  --color-accent-hover: var(--accent-hover);
   --color-border: var(--border);
   --font-sans: var(--font-geist-sans);
 }
@@ -27,4 +28,9 @@ body {
   background-color: #0A0416 !important;
   color: #FFFFFF;
   font-family: var(--font-sans), -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+* {
+  box-sizing: border-box;
 }

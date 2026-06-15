@@ -14,38 +14,44 @@ export default function CategoryGrid() {
   const categories = Object.entries(CATEGORIES) as [Category, typeof CATEGORIES[Category]][];
 
   return (
-    <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+    <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
       {categories.map(([slug, cat]) => (
         <Link
           key={slug}
           href={`/category/${slug}`}
-          className="group relative overflow-hidden rounded-2xl aspect-[3/4] flex flex-col justify-end"
-          style={{ textDecoration: "none" }}
+          className="group relative overflow-hidden rounded-2xl flex flex-col justify-end"
+          style={{ aspectRatio: "3/4", textDecoration: "none" }}
         >
           {/* Background image */}
           <div
-            className="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-105"
+            className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-110"
             style={{ backgroundImage: `url(${CATEGORY_IMAGES[slug]})` }}
           />
-          {/* Dark gradient overlay */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
-          {/* Category accent top bar */}
+
+          {/* Layered gradient — strong at bottom for text legibility */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-black/10" />
+
+          {/* Colour accent line at top */}
           <div
-            className="absolute top-0 left-0 right-0 h-1 transition-all duration-300 group-hover:h-1.5"
+            className="absolute top-0 left-0 right-0 h-[3px] transition-all duration-300"
             style={{ background: cat.color }}
           />
-          {/* Content */}
-          <div className="relative p-4">
-            <div className="text-3xl mb-2">{cat.icon}</div>
-            <h3 className="text-white font-bold text-lg leading-tight mb-1">
+
+          {/* Content pinned to bottom */}
+          <div className="relative px-4 pb-5 pt-0">
+            <div className="text-2xl mb-1.5">{cat.icon}</div>
+            <h3 className="text-white font-bold text-base leading-tight tracking-tight mb-0.5">
               {cat.label}
             </h3>
-            <p className="text-white/70 text-xs">
+            <p className="text-white/60 text-xs leading-snug">
               {cat.description}
             </p>
-            <div className="mt-3 flex items-center gap-1 text-xs font-medium text-white/90 group-hover:text-white transition-colors">
-              Explore
-              <span className="transition-transform group-hover:translate-x-1">→</span>
+            <div
+              className="mt-3 inline-flex items-center gap-1 text-xs font-semibold rounded-full px-3 py-1 transition-all duration-200 group-hover:gap-2"
+              style={{ background: cat.color + "22", color: cat.color }}
+            >
+              Browse
+              <span className="transition-transform duration-200 group-hover:translate-x-0.5">→</span>
             </div>
           </div>
         </Link>
