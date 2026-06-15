@@ -5,7 +5,7 @@ import { CATEGORIES, Category } from "@/lib/types";
 
 const CATEGORY_IMAGES: Record<Category, string> = {
   lectures: "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800&q=80",
-  culture: "https://images.unsplash.com/photo-1547826039-bfc35e0f1ea8?w=800&q=80",
+  culture: "https://images.unsplash.com/photo-1554907984-15263bfd63bd?w=800&q=80",
   activities: "https://images.unsplash.com/photo-1517457373958-b7bdd4587205?w=800&q=80",
   cinema: "https://images.unsplash.com/photo-1478720568477-152d9b164e26?w=800&q=80",
 };
