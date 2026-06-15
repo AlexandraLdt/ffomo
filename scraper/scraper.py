@@ -157,12 +157,15 @@ async def scrape_venue(db, venue: dict, run_id: str):
     events_found = 0
     new_events = 0
     updated_events = 0
+    page_text_length = 0
 
     try:
         html = await fetch_html(venue["url"])
+        text = strip_html(html)
+        page_text_length = len(text)
         events = extract_events_with_claude(html, venue["url"])
         events_found = len(events)
-        log.info(f"  → {events_found} events found")
+        log.info(f"  → {events_found} events found (page text: {page_text_length:,} chars)")
         new_events, updated_events = upsert_events(db, venue["id"], events)
         db.table("venues").update({"last_scraped_at": now_utc()}).eq("id", venue["id"]).execute()
     except Exception as e:
@@ -176,6 +179,7 @@ async def scrape_venue(db, venue: dict, run_id: str):
         "events_found": events_found,
         "new_events": new_events,
         "updated_events": updated_events,
+        "page_text_length": page_text_length,
         "error": error,
         "scraped_at": now_utc(),
     }).execute()

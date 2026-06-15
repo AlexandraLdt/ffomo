@@ -1,11 +1,14 @@
 import { supabase } from "@/lib/supabase";
 
+const MIN_PAGE_TEXT = 200; // chars below this = page likely broken
+
 interface ScraperLog {
   venue_id: string;
   venue_name: string;
   events_found: number;
   new_events: number;
   updated_events: number;
+  page_text_length: number;
   error: string | null;
   scraped_at: string;
 }
@@ -68,7 +71,8 @@ export default async function AdminPage() {
   const totalEvents = run?.scraper_logs.reduce((s, l) => s + l.events_found, 0) ?? 0;
   const totalNew = run?.scraper_logs.reduce((s, l) => s + l.new_events, 0) ?? 0;
   const totalErrors = run?.scraper_logs.filter(l => l.error).length ?? 0;
-  const totalZero = run?.scraper_logs.filter(l => !l.error && l.events_found === 0).length ?? 0;
+  const totalEmpty = run?.scraper_logs.filter(l => !l.error && l.events_found === 0 && l.page_text_length >= MIN_PAGE_TEXT).length ?? 0;
+  const totalBroken = run?.scraper_logs.filter(l => !l.error && l.events_found === 0 && l.page_text_length < MIN_PAGE_TEXT).length ?? 0;
 
   return (
     <main style={{ background: "var(--bg)", minHeight: "100vh", padding: "2rem", color: "var(--text)" }}>
@@ -99,11 +103,12 @@ export default async function AdminPage() {
                   Duration: {duration(run.started_at, run.finished_at)}
                 </span>
               </div>
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "1rem" }}>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: "1rem" }}>
                 {[
                   { label: "Events found", value: totalEvents, color: "var(--text)" },
                   { label: "New events", value: totalNew, color: "#4ade80" },
-                  { label: "Warnings (0 events)", value: totalZero, color: "#facc15" },
+                  { label: "No events (ok)", value: totalEmpty, color: "#facc15" },
+                  { label: "Broken pages", value: totalBroken, color: "#fb923c" },
                   { label: "Errors", value: totalErrors, color: "#f87171" },
                 ].map(({ label, value, color }) => (
                   <div key={label} style={{ textAlign: "center" }}>
@@ -128,9 +133,14 @@ export default async function AdminPage() {
           <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
             {venues.map(venue => {
               const log = logsByVenue.get(venue.id);
-              const status = !log ? "not-run" : log.error ? "error" : log.events_found === 0 ? "warning" : "ok";
-              const statusColor = { ok: "#4ade80", warning: "#facc15", error: "#f87171", "not-run": "var(--text-dim)" }[status];
-              const statusDot = { ok: "●", warning: "●", error: "●", "not-run": "○" }[status];
+              const status = !log ? "not-run"
+                : log.error ? "error"
+                : log.events_found > 0 ? "ok"
+                : log.page_text_length < MIN_PAGE_TEXT ? "broken"
+                : "empty";
+              const statusColor = { ok: "#4ade80", empty: "#facc15", broken: "#f87171", error: "#f87171", "not-run": "var(--text-dim)" }[status];
+              const statusDot = { ok: "●", empty: "●", broken: "●", error: "●", "not-run": "○" }[status];
+              const statusLabel = { ok: null, empty: "No events", broken: "Page may be broken", error: null, "not-run": null }[status];
 
               return (
                 <div key={venue.id} style={{
@@ -161,6 +171,11 @@ export default async function AdminPage() {
                     <a href={venue.url} target="_blank" rel="noopener noreferrer" className="venue-url">
                       {venue.url}
                     </a>
+                    {statusLabel && (
+                      <div style={{ marginTop: "0.2rem", fontSize: "0.72rem", color: statusColor }}>
+                        {statusLabel}{log && log.page_text_length > 0 && ` · ${log.page_text_length.toLocaleString()} chars`}
+                      </div>
+                    )}
                     {log?.error && (
                       <div style={{ marginTop: "0.25rem", fontSize: "0.75rem", color: "#f87171" }}>
                         {log.error}
