@@ -1,0 +1,158 @@
+[
+  {
+    "id": "schirn",
+    "name": "Schirn Kunsthalle Frankfurt",
+    "url": "https://www.schirn.de/programm/",
+    "category": "culture"
+  },
+  {
+    "id": "staedel",
+    "name": "Städel Museum",
+    "url": "https://www.staedelmuseum.de/en/exhibitions-programme",
+    "category": "culture"
+  },
+  {
+    "id": "juedisches-museum",
+    "name": "Jüdisches Museum Frankfurt",
+    "url": "https://www.juedischesmuseum.de/",
+    "category": "culture"
+  },
+  {
+    "id": "mmk",
+    "name": "Museum für Moderne Kunst (MMK)",
+    "url": "https://www.mmk.art/de/whats-on",
+    "category": "culture"
+  },
+  {
+    "id": "romantik-museum",
+    "name": "Deutsches Romantik-Museum",
+    "url": "https://deutsches-romantik-museum.de/programm/",
+    "category": "culture"
+  },
+  {
+    "id": "schauspiel-frankfurt",
+    "name": "Schauspiel Frankfurt",
+    "url": "https://www.schauspielfrankfurt.de/spielplan/kalender/",
+    "category": "culture"
+  },
+  {
+    "id": "alte-oper",
+    "name": "Alte Oper Frankfurt",
+    "url": "https://www.alteoper.de/de/programm",
+    "category": "culture"
+  },
+  {
+    "id": "oper-frankfurt",
+    "name": "Oper Frankfurt",
+    "url": "https://oper-frankfurt.de/de/spielplan/",
+    "category": "culture"
+  },
+  {
+    "id": "palmengarten",
+    "name": "Palmengarten Frankfurt",
+    "url": "https://www.palmengarten.de/de/kalender.html",
+    "category": "culture"
+  },
+  {
+    "id": "malsehkino",
+    "name": "Mal Seh'n Kino",
+    "url": "https://malsehnkino.de/index.php?section=week",
+    "category": "cinema"
+  },
+  {
+    "id": "arthouse-kinos",
+    "name": "Arthouse Kinos Frankfurt",
+    "url": "https://www.arthouse-kinos.de/",
+    "category": "cinema"
+  },
+  {
+    "id": "cinestar-metropolis",
+    "name": "CineStar Frankfurt Metropolis",
+    "url": "https://www.cinestar.de/kino-frankfurt-main-metropolis#kinoprogramm",
+    "category": "cinema"
+  },
+  {
+    "id": "freiluftkino",
+    "name": "Freiluftkino Frankfurt",
+    "url": "https://www.freiluftkinofrankfurt.de/",
+    "category": "cinema"
+  },
+  {
+    "id": "polytechnische",
+    "name": "Polytechnische Gesellschaft Frankfurt",
+    "url": "https://polytechnische.de/veranstaltungen",
+    "category": "lectures"
+  },
+  {
+    "id": "prif",
+    "name": "PRIF – Peace Research Institute Frankfurt",
+    "url": "https://www.prif.org/veranstaltungen",
+    "category": "lectures"
+  },
+  {
+    "id": "boell-hessen",
+    "name": "Heinrich-Böll-Stiftung Hessen",
+    "url": "https://www.boell-hessen.de/",
+    "category": "lectures"
+  },
+  {
+    "id": "kas-hessen",
+    "name": "Konrad-Adenauer-Stiftung Hessen",
+    "url": "https://www.kas.de/de/web/hessen/veranstaltungen",
+    "category": "lectures"
+  },
+  {
+    "id": "fdp-stiftung",
+    "name": "Friedrich-Naumann-Stiftung – Veranstaltungen",
+    "url": "https://shop.freiheit.org/#Veranstaltungen/",
+    "category": "lectures"
+  },
+  {
+    "id": "medico",
+    "name": "Stiftung Medico International",
+    "url": "https://www.stiftung-medico.de/symposien",
+    "category": "lectures"
+  },
+  {
+    "id": "evangelische-akademie",
+    "name": "Evangelische Akademie Frankfurt",
+    "url": "https://www.evangelische-akademie.de/kalender/",
+    "category": "lectures"
+  },
+  {
+    "id": "kulturelles-frankfurt",
+    "name": "Kulturelles Frankfurt",
+    "url": "https://kulturellesfrankfurt.de/veranstaltungen",
+    "category": "lectures"
+  },
+  {
+    "id": "visit-frankfurt",
+    "name": "Visit Frankfurt – Veranstaltungskalender",
+    "url": "https://www.visitfrankfurt.travel/erleben/veranstaltungskalender",
+    "category": "activities"
+  },
+  {
+    "id": "coloria",
+    "name": "Coloria Frankfurt",
+    "url": "https://coloria.de/",
+    "category": "activities"
+  },
+  {
+    "id": "viola-beuscher",
+    "name": "Viola Beuscher",
+    "url": "https://violabeuscher.com/",
+    "category": "activities"
+  },
+  {
+    "id": "frankfurt-lieblingsorte",
+    "name": "Frankfurt Lieblingsorte",
+    "url": "https://www.frankfurtlieblingsorte.de/",
+    "category": "activities"
+  },
+  {
+    "id": "hfm-flohmaerkte",
+    "name": "HFM Frankfurt – Flohmärkte",
+    "url": "https://www.hfm-frankfurt.de/flohmaerkte",
+    "category": "activities"
+  }
+]
