@@ -3,6 +3,10 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
+function toLocalDateStr(d: Date): string {
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+}
+
 function getDaysInMonth(year: number, month: number) {
   return new Date(year, month + 1, 0).getDate();
 }
@@ -23,14 +27,14 @@ export default function Calendar({ eventDates = new Set(), onDateSelect }: Calen
   const [month, setMonth] = useState(now.getMonth());
   const router = useRouter();
 
-  const todayStr = now.toISOString().split("T")[0];
+  const todayStr = toLocalDateStr(now);
   const daysInMonth = getDaysInMonth(year, month);
   const firstDay = getFirstDayOfMonth(year, month);
   const offset = (firstDay + 6) % 7; // Mon-first
 
   function handleDay(day: number) {
     const d = new Date(year, month, day);
-    const str = d.toISOString().split("T")[0];
+    const str = toLocalDateStr(d);
     if (onDateSelect) onDateSelect(str);
     else router.push(`/day/${str}`);
   }
@@ -93,7 +97,7 @@ export default function Calendar({ eventDates = new Set(), onDateSelect }: Calen
         {cells.map((day, i) => {
           if (!day) return <div key={i} />;
           const d = new Date(year, month, day);
-          const str = d.toISOString().split("T")[0];
+          const str = toLocalDateStr(d);
           const isToday = str === todayStr;
           const hasEvents = eventDates.has(str);
           const isPast = d < new Date(now.getFullYear(), now.getMonth(), now.getDate());
